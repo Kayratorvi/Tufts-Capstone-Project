@@ -1,6 +1,8 @@
 # Tufts-Capstone-Project
 **Gavin Grooms**
+
 **Fall 2023 - May 2024**
+
 **Tufts University**
 
 ## What is it?
