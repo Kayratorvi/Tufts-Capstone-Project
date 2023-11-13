@@ -3,6 +3,10 @@ from pydub import AudioSegment
 import os
 import sys
 
+if len(sys.argv) <= 1:
+    os.system("echo Usage: python gavin_nsound_pydub.py [hz of base note]")
+    sys.exit(-1)
+
 sr = 44100.0
 BITS_PER_SAMPLE = 24
 
@@ -64,5 +68,5 @@ def chord(sr, base_frequency, duration, gaussian_width, name):
     os.remove(name1)
     os.remove(name2)
 
-chord(sr, 260, 1.0, .90, "gavin_test_chord.wav")
+chord(sr, float(sys.argv[1]), 1.0, .90, "gavin_test_chord_" + sys.argv[1] + ".wav")
 sys.exit()
