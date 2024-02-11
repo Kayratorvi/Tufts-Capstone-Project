@@ -113,6 +113,18 @@
         <h2>Jan. 21-27 Report</h2>
         <p>
             This is the start of my reporting for the second semester of my capstone project! Due to my completion of all planning aspects of this project before the holiday break, I elected to take the holiday as a break from all school-related activities, so I do not have anything to report on for that time. This week I worked on setting up a plan for an exact order of my project for phase 1. First, I intend to implement my MIDI parser functionality, as that will potentially impact how the rest of phase 1 will be implemented. The parser should be completed ideally by Feb. 10th so that I can begin work on translating the data pulled from the parser into the audio output. I started work on this late this week, and will have more to report on in this coming week's report.
+
+            I discovered that the MIDIFile python library isn't easy to work with on Windows, which is the OS I am using. I am instead going to try and work with a different MIDI library I found, called Mido.
+        </p>
+        <h2>Jan. 28-Feb. 3 Report</h2>
+        <p>
+            This week I was able to successfully get Mido included in my project to read in a MIDI file. However, I found in investigating a MIDI file I read using Mido that MIDI files are structured a bit differently than I had hoped. Essentially, a MIDI file contains an array of MIDI "messages" that are interpreted by a MIDI capable device as commands in live time. NSound will be looking for input that specifies the exact length of each note to be played, which means I will need to perform some preprocessing on the MIDIMessages to specify the length of time each note is to be played. This will need to be done by reading through the entire MIDI file and putting the end_note timestamp on the end of each note_on message when a message is found that turns the note off. Because the structure provided by Mido doesn't include this functionality on its own, I will need to build my own data structure to handle the extra data. 
+            
+            MIDI messages use delta time in microseconds to determine how much time to wait in between MIDI messages. So, this new data field will be the total time in microseconds from the time the note_on message starts to the time its corresponding note_off message is found. The data structure will replace the MIDIMessage and I will plan to create an array of these modified messages. Since I will likely need somewhere to store my custom intonation frequencies during preprocessing, I will also add a field to store the frequency as a number.
+
+            Once the preprocessing is complete, I should be able to more directly feed each MIDI message into NSound, as each one will have information on the total length of the note as well as its final intonation. This should allow for a more seamless stream from Mido to NSound. 
+
+            While this week did not include too much coding aside from setting up Mido, it did include a lot of research and planning to come up with the above. Next week I plan to start writing the code needed for preprocessing the note_off timestamp.
         </p>
     </body>
 </html>
