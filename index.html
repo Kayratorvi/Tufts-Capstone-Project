@@ -126,5 +126,15 @@
 
             While this week did not include too much coding aside from setting up Mido, it did include a lot of research and planning to come up with the above. Next week I plan to start writing the code needed for preprocessing the note_off timestamp.
         </p>
+        <h2>Feb. 4-10 Report</h2>
+        <p>
+            This week I began work on writing the data structure to extend the MidiMessage structure, and also worked on my first attempt at parsing through the MIDI file to add all note_on messages to a list using my data structure to add the length of each note. At this point, I need to perform some testing on what I have so far, because I may already have both solutions exactly as they should be.
+
+            My data structure is called MidiMessageExt and adds the fields timestamp, note_length, and frequency. The timestamp is the total of all delta time up to the start of this message, while the note_length field is the difference between the corresponding note_off timestamp and this message's timestamp. I plan to use the frequency field later on to store information I need to accurately adjust the tuning of each note as planned. 
+
+            The function I wrote is a loop that parses every message in the MidiFile, ignoring all messages (for now) that do not have the type note_on or note_off. If it's a note_on message with a velocity greater than 0, then the message is extended using my custom data structure and is added to another list with a value of -1 as the note_length field and the current timestamp in the timestamp field. Then, later on when a note_off or note_on with velocity 0 message is found, it searches from the beginning of my list of extended messages for a note_on message with a matching note and channel that does not have a note_length assigned to it yet and fills in that field. This ensures that once a note has a note_length assigned to it that any later note_off message with the same channel and note ignores this message as it looks to add a note_length field. Please see my capstone_testing.py file for a look at what this function looks like. 
+
+            This function was successful when I plugged in a large MIDI file I found online. However, MIDI files can vary a lot so I intend to spend some time testing this function in the coming week before moving onto further preprocessing steps to make sure that this function is working exactly as intended. This function is foundational in my project, so it's critical that I have the implementation exactly right.
+        </p>
     </body>
 </html>

@@ -20,31 +20,34 @@ mergedMid = mid.merged_track
 #print(mergedMid[1000].time)
 #print(mergedMid[0].is_meta)
 
-queue = list()
-totalDeltaTime = 0
+def process_note_lengths(midi):
+    queue = list()
+    totalDeltaTime = 0
 
-for message in mergedMid:
-    foundNote = False
-    totalDeltaTime += message.time
-    if not message.is_meta:
-        if message.type == "note_on" and message.velocity != 0:
-            queue.append(MidiMessageExt(message.channel, message.note, message.velocity, message.time, totalDeltaTime))
+    for message in midi:
+        foundNote = False
+        totalDeltaTime += message.time
+        if not message.is_meta:
+            if message.type == "note_on" and message.velocity != 0:
+                queue.append(MidiMessageExt(message.channel, message.note, message.velocity, message.time, totalDeltaTime))
 
-        elif (message.type == "note_on" and message.velocity == 0) or message.type == "note_off":
-            for note in queue:
-                if note.note == message.note and note.channel == message.channel and note.note_length < 0:
-                    foundNote = True
-                    note.change_note_length(totalDeltaTime - note.timestamp)
-                    break
+            elif (message.type == "note_on" and message.velocity == 0) or message.type == "note_off":
+                for note in queue:
+                    if note.note == message.note and note.channel == message.channel and note.note_length < 0:
+                        foundNote = True
+                        note.change_note_length(totalDeltaTime - note.timestamp)
+                        break
+                
+                if not foundNote:
+                    raise RuntimeError("Couldn't find the note to match note_off message.")
             
-            if not foundNote:
-                raise RuntimeError("Couldn't find the note to match note_off message.")
-        
-        else:
-            print("Didn't process this message: " + str(message))
+            else:
+                print("Didn't process this message: " + str(message))
 
+    return queue
+
+queue = process_note_lengths(mergedMid)
 print(queue)
-
 
 # Tentative MIDI Parsing Plan:
 # Add MIDI messages to queue separated by beat (MidiFile.ticks_per_beat)

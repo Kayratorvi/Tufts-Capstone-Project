@@ -9,10 +9,10 @@ class MidiMessageExt:
         self.frequency = 0.0
 
     def __repr__(self):
-        return f"MidiMessageExt(channel={self.channel}, note={self.note}, velocity={self.velocity}, time={self.delta_time}, timestamp={self.timestamp}, note_length={self.note_length}, tuning={self.frequency})\n"
+        return f"\nMidiMessageExt(channel={self.channel}, note={self.note}, velocity={self.velocity}, time={self.delta_time}, timestamp={self.timestamp}, note_length={self.note_length}, tuning={self.frequency})"
 
     def __str__(self):
-        return f"MidiMessageExt(channel={self.channel}, note={self.note}, velocity={self.velocity}, time={self.delta_time}, timestamp={self.timestamp}, note_length={self.note_length}, tuning={self.frequency})\n"
+        return f"\nMidiMessageExt(channel={self.channel}, note={self.note}, velocity={self.velocity}, time={self.delta_time}, timestamp={self.timestamp}, note_length={self.note_length}, tuning={self.frequency})"
 
     def change_frequency(self, frequency):
         self.frequency = frequency
