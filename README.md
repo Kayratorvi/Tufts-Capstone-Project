@@ -8,7 +8,7 @@
 ## What is it?
 My project will allow a user to produce a computer accompaniment that can match the intonation of the player. It will adjust the intonation of the other notes in each chord based on the input from the performer using Just Intonation (pictured below) or the standard Equal Temperament depending on user preference.
 
-![image](./just_intonation.jpg)
+![image](./docs/just_intonation.jpg)
 
 ## Who would want to use this?
 In the music industry, students and individuals looking to make personal recordings for auditions or other endeavors must either hire an accompanist, fit their tuning and style to computerized recordings, or play without accompaniment.
@@ -22,7 +22,7 @@ A user would provide a MIDI file of the accompaniment and a recording of their o
 Analysis of their recording is performed to decide adjustments to accompaniment.
 Program outputs a recording of the accompaniment with adjustments made to the tuning to match the human performer.
 
-![image](./program_flow.png)
+![image](./docs/program_flow.png)
 
 ## Timeline
 I expect to complete this project by May 2024 for submission and completion of my Master's degree, however I may continue to supplement this with new features as I see fit in the future. I plan to implement this project by completing any number of phases shown below that mark distinct and important features that I envision this project to have. 
