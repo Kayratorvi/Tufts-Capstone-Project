@@ -83,12 +83,12 @@
             This week I met with Marty Allen again and discussed how to handle the submission of my competency demo and proof of concept demo, as they have basically melded into the same thing. I don't have much experience with Python, NSound, or any of the tools I'm using for my project, so I went ahead and worked on a proof of concept to also serve as proof that I am capable of working on the project in the first place. I am submitting both on Nov. 12 to Canvas. Since Zoom wouldn't include the audio from the two .wav files created during my demo, I am instead going to embed them inside this week's entry. They should both be below, 261 hz and 440 hz:
             <br>
             <audio controls>
-                <source src="gavin_test_chord_261.wav" type="audio/wav">
+                <source src="./docs/gavin_test_chord_261.wav" type="audio/wav">
                 Your browser does not support the audio tag.
             </audio>
             <br>
             <audio controls>
-            <source src="gavin_test_chord_440.wav" type="audio/wav">
+            <source src="./docs/gavin_test_chord_440.wav" type="audio/wav">
             Your browser does not support the audio tag.
             </audio>
             <br>
@@ -113,45 +113,45 @@
         <h2>Jan. 21-27 Report</h2>
         <p>
             This is the start of my reporting for the second semester of my capstone project! Due to my completion of all planning aspects of this project before the holiday break, I elected to take the holiday as a break from all school-related activities, so I do not have anything to report on for that time. This week I worked on setting up a plan for an exact order of my project for phase 1. First, I intend to implement my MIDI parser functionality, as that will potentially impact how the rest of phase 1 will be implemented. The parser should be completed ideally by Feb. 10th so that I can begin work on translating the data pulled from the parser into the audio output. I started work on this late this week, and will have more to report on in this coming week's report.
-
+            <br><br>
             I discovered that the MIDIFile python library isn't easy to work with on Windows, which is the OS I am using. I am instead going to try and work with a different MIDI library I found, called Mido.
         </p>
         <h2>Jan. 28-Feb. 3 Report</h2>
         <p>
             This week I was able to successfully get Mido included in my project to read in a MIDI file. However, I found in investigating a MIDI file I read using Mido that MIDI files are structured a bit differently than I had hoped. Essentially, a MIDI file contains an array of MIDI "messages" that are interpreted by a MIDI capable device as commands in live time. NSound will be looking for input that specifies the exact length of each note to be played, which means I will need to perform some preprocessing on the MIDIMessages to specify the length of time each note is to be played. This will need to be done by reading through the entire MIDI file and putting the end_note timestamp on the end of each note_on message when a message is found that turns the note off. Because the structure provided by Mido doesn't include this functionality on its own, I will need to build my own data structure to handle the extra data. 
-            
+            <br><br>
             MIDI messages use delta time in microseconds to determine how much time to wait in between MIDI messages. So, this new data field will be the total time in microseconds from the time the note_on message starts to the time its corresponding note_off message is found. The data structure will replace the MIDIMessage and I will plan to create an array of these modified messages. Since I will likely need somewhere to store my custom intonation frequencies during preprocessing, I will also add a field to store the frequency as a number.
-
+            <br><br>
             Once the preprocessing is complete, I should be able to more directly feed each MIDI message into NSound, as each one will have information on the total length of the note as well as its final intonation. This should allow for a more seamless stream from Mido to NSound. 
-
+            <br><br>
             While this week did not include too much coding aside from setting up Mido, it did include a lot of research and planning to come up with the above. Next week I plan to start writing the code needed for preprocessing the note_off timestamp.
         </p>
         <h2>Feb. 4-10 Report</h2>
         <p>
             This week I began work on writing the data structure to extend the MidiMessage structure, and also worked on my first attempt at parsing through the MIDI file to add all note_on messages to a list using my data structure to add the length of each note. At this point, I need to perform some testing on what I have so far, because I may already have both solutions exactly as they should be.
-
+            <br><br>
             My data structure is called MidiMessageExt and adds the fields timestamp, note_length, and frequency. The timestamp is the total of all delta time up to the start of this message, while the note_length field is the difference between the corresponding note_off timestamp and this message's timestamp. I plan to use the frequency field later on to store information I need to accurately adjust the tuning of each note as planned. 
-
+            <br><br>
             The function I wrote is a loop that parses every message in the MidiFile, ignoring all messages (for now) that do not have the type note_on or note_off. If it's a note_on message with a velocity greater than 0, then the message is extended using my custom data structure and is added to another list with a value of -1 as the note_length field and the current timestamp in the timestamp field. Then, later on when a note_off or note_on with velocity 0 message is found, it searches from the beginning of my list of extended messages for a note_on message with a matching note and channel that does not have a note_length assigned to it yet and fills in that field. This ensures that once a note has a note_length assigned to it that any later note_off message with the same channel and note ignores this message as it looks to add a note_length field. Please see my capstone_testing.py file for a look at what this function looks like. 
-
+            <br><br>
             This function was successful when I plugged in a large MIDI file I found online. However, MIDI files can vary a lot so I intend to spend some time testing this function in the coming week before moving onto further preprocessing steps to make sure that this function is working exactly as intended. This function is foundational in my project, so it's critical that I have the implementation exactly right.
         </p>
         <h2>Feb. 11-17 Report</h2>
         <p>
             As mentioned in my report from the previous week, I spent time this week gathering various MIDI files and testing them with my program thus far. My function is designed to throw an exception upon failure, and in all my tests everything worked as expected. It seems safe at this point to continue with the next step of this phase, since as far as I can tell everything is working correctly.
-
+            <br><br>
             The next step is to write some additional preprocessing code to link all the MidiMessageExts together in a logical format. This will require that I use the ticks_per_beat value of the MIDI to group notes together with other notes that are nearby. I plan to do this by adding a list to each MidiMessageExt of all notes that end within one beat of the current note or are still on or start within a beat of the current note. The idea will be that each note on its own will know all the other notes that are being played at the same time so that analysis of chord progressions can be performed in a way that makes sense in a separate preprocessing step. Linking all notes together is critical to ensure this is possible. Hopefully I will have the function to link all notes to their neighbors finished by the end of next week's report.
         </p>
         <h2>Feb. 18-24 Report</h2>
         <p>
             This week I began work on writing the additional preprocessing that will add all notes that belong together to a list in each MidiMessageExt, which includes the actual MidiMessageExt and index in the list of each note. I'm pleased to write that my new function to handle this logic works correctly. It was tricky making sure that the function was efficient as I was potentially looking at O(n^2) time if I ran all parts of the function naively. It's way too time consuming to inspect every note in a piece of music when determining which ones are relevant to each other, so I tried to write the loops in a way that would skip notes that are irrelevant. This is accomplished by the fact that the list of MidiMessageExts that I have is ordered by timestamp. Any index greater than the current note either begins on or after the same timestamp as the current note, and any index less than the current note begins on or before the same timestamp as the current note. This meant that I could stop iterating as soon as I encountered a note that was too far away in timestamp in either direction.
-
+            <br><br>
             However, I soon realized there was a critical error with this logic: suppose I am considering a quarter note with index 38 in measure 3 and have one instrument in an orchestra playing a prolonged note with index 0 that lasts 3 whole measures. This note at index 0 will be relevant to all notes that are played until the end of measure 3, but my logic above to save time may not consider this note if it stops iterating backwards due to a short note that begins and ends quickly in measure 2 at index 28. This meant I needed a way to somehow know that this note at index 0 was relevant without being required to iterate all the way back to index 0. In the worst case, I might have music for bagpipes that has a note being played from the beginning of the piece all the way through the end!
-
+            <br><br>
             However, I have found a solution that maintains time savings while ensuring that these exceptionally long notes are not ignored. I created an extra loop after the backwards iteration to look for any notes that those notes are linked to that may be relevant to the current note being worked on. This works because in the above example, the notes at index 1 and 2 will obviously consider note 0, and note 3 will know to add note 0 since it is relevant to note 2 even if note 1 is not relevant!
-
+            <br><br>
             I'm pretty happy with this solution, and in my testing the preprocessing runs even for long pieces without taking up too much extra time. I have ensured that these exceptional cases are correctly covered and that the list of relevant notes are correct for each note in the list.
-
+            <br><br>
             This coming week I will begin a large step of my capstone, which will be to write rules to determine the actual intonation for each note before I can feed them into my Nsound stream.
         </p>
     </body>
