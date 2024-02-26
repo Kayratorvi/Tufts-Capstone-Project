@@ -5,20 +5,7 @@ from mymidimessage import MidiMessageExt
 import os
 import sys
 
-if len(sys.argv) <= 1:
-    os.system("echo Usage: python midi_parser.py midi_file_name")
-    sys.exit(-1)
-
-mid = MidiFile(sys.argv[1])
-mergedMid = mid.merged_track
-#print(mid.ticks_per_beat)
-#print(mergedMid)
-#print(mergedMid[1000])
-#print(mergedMid[1000].channel)
-#print(mergedMid[1000].type)
-#print(mergedMid[1000].velocity)
-#print(mergedMid[1000].time)
-#print(mergedMid[0].is_meta)
+log = open("log.txt", "w")
 
 def process_note_lengths(midi):
     queue = list()
@@ -29,7 +16,7 @@ def process_note_lengths(midi):
         totalDeltaTime += message.time
         if not message.is_meta:
             if message.type == "note_on" and message.velocity != 0:
-                queue.append(MidiMessageExt(message.channel, message.note, message.velocity, message.time, totalDeltaTime))
+                queue.append(MidiMessageExt(message.channel, message.note, message.velocity, totalDeltaTime))
 
             elif (message.type == "note_on" and message.velocity == 0) or message.type == "note_off":
                 for note in queue:
@@ -42,23 +29,54 @@ def process_note_lengths(midi):
                     raise RuntimeError("Couldn't find the note to match note_off message.")
             
             else:
-                print("Didn't process this message: " + str(message))
+                log.write("\nDidn't process this message: " + str(message))
 
     return queue
 
+def link_notes(notes, ticks_per_beat):
+    # This loop adds notes that end within one beat or after the current note
+    for index, note in enumerate(notes):
+        for to_link_index in range(index - 1, -1, -1):
+            if notes[to_link_index].note_ends_timestamp() > (note.timestamp - ticks_per_beat):
+                # note is being played within one beat earlier of current note
+                note.link_note(notes[to_link_index], to_link_index)
+            else:
+                break # there may be notes that start much earlier but have a long duration, will consider in next loop section
+
+        for linked_note in note.linked_notes:
+            for linked_note_linked_note in linked_note.linked_notes:
+                if (linked_note_linked_note.note_ends_timestamp() > (note.timestamp - ticks_per_beat)) and linked_note_linked_note not in note.linked_notes:
+                    note.link_note(linked_note_linked_note, notes.index(linked_note_linked_note))
+                    # This loop handles any note that starts much earlier in 
+                    # the music and has an exceptionally long duration that 
+                    # extends much longer than notes that start after this note 
+                    # but before the note in the linking step. These notes will 
+                    # already be added in previous notes and will be added by
+                    # looking at the linked notes of all currently linked notes
+        
+    # This loop adds all notes that start within one beat after the current note
+    for index, note in enumerate(notes):
+        for to_link_index2 in range(index + 1, len(notes), 1):
+            if notes[to_link_index2].timestamp < (note.timestamp + ticks_per_beat):
+                # note begins within one beat later of current note
+                note.link_note(notes[to_link_index2], to_link_index2)
+            else:
+                break # all other notes begin later in music
+
+        
+if len(sys.argv) <= 1:
+    os.system("echo Usage: python midi_parser.py midi_file_name")
+    sys.exit(-1)
+
+mid = MidiFile(sys.argv[1])
+mergedMid = mid.merged_track
+
+#print(mergedMid)
+#print("**********************\n**********************")
 queue = process_note_lengths(mergedMid)
 print(queue)
-
-# Tentative MIDI Parsing Plan:
-# Add MIDI messages to queue separated by beat (MidiFile.ticks_per_beat)
-# When a beat has past before the next message is to be added, 
-# analyze the messages currently in the queue to determine tuning,
-# and use that tuning when feeding the messages in queue to NSound.
-# Empty the queue before adding the next messages. 
-
-# When taking in messages from the queue, add them to another queue-like 
-# structure that awaits a note_off message or a note_on message that
-# matches the message in all attributes except having a velocity of 0.
-
-# 2/2/24 Update
-# Read in MIDI file message by message and modify each note_on message to include the note_off timestamp. Basically, each note_on message needs to be stored into memory with a timestamp until a note_off or note_on with velocity 0 message is found. Then, the original note_on message is modified to include exactly how much time that note is on. This will require deviating from the MIDI message structure and using my own data structure entirely. 
+link_notes(queue, mid.ticks_per_beat - 1)
+print(queue[38])
+print(mid.ticks_per_beat)
+print(queue[38].linked_notes)
+print(queue[38].linked_indices)

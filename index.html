@@ -136,5 +136,23 @@
 
             This function was successful when I plugged in a large MIDI file I found online. However, MIDI files can vary a lot so I intend to spend some time testing this function in the coming week before moving onto further preprocessing steps to make sure that this function is working exactly as intended. This function is foundational in my project, so it's critical that I have the implementation exactly right.
         </p>
+        <h2>Feb. 11-17 Report</h2>
+        <p>
+            As mentioned in my report from the previous week, I spent time this week gathering various MIDI files and testing them with my program thus far. My function is designed to throw an exception upon failure, and in all my tests everything worked as expected. It seems safe at this point to continue with the next step of this phase, since as far as I can tell everything is working correctly.
+
+            The next step is to write some additional preprocessing code to link all the MidiMessageExts together in a logical format. This will require that I use the ticks_per_beat value of the MIDI to group notes together with other notes that are nearby. I plan to do this by adding a list to each MidiMessageExt of all notes that end within one beat of the current note or are still on or start within a beat of the current note. The idea will be that each note on its own will know all the other notes that are being played at the same time so that analysis of chord progressions can be performed in a way that makes sense in a separate preprocessing step. Linking all notes together is critical to ensure this is possible. Hopefully I will have the function to link all notes to their neighbors finished by the end of next week's report.
+        </p>
+        <h2>Feb. 18-24 Report</h2>
+        <p>
+            This week I began work on writing the additional preprocessing that will add all notes that belong together to a list in each MidiMessageExt, which includes the actual MidiMessageExt and index in the list of each note. I'm pleased to write that my new function to handle this logic works correctly. It was tricky making sure that the function was efficient as I was potentially looking at O(n^2) time if I ran all parts of the function naively. It's way too time consuming to inspect every note in a piece of music when determining which ones are relevant to each other, so I tried to write the loops in a way that would skip notes that are irrelevant. This is accomplished by the fact that the list of MidiMessageExts that I have is ordered by timestamp. Any index greater than the current note either begins on or after the same timestamp as the current note, and any index less than the current note begins on or before the same timestamp as the current note. This meant that I could stop iterating as soon as I encountered a note that was too far away in timestamp in either direction.
+
+            However, I soon realized there was a critical error with this logic: suppose I am considering a quarter note with index 38 in measure 3 and have one instrument in an orchestra playing a prolonged note with index 0 that lasts 3 whole measures. This note at index 0 will be relevant to all notes that are played until the end of measure 3, but my logic above to save time may not consider this note if it stops iterating backwards due to a short note that begins and ends quickly in measure 2 at index 28. This meant I needed a way to somehow know that this note at index 0 was relevant without being required to iterate all the way back to index 0. In the worst case, I might have music for bagpipes that has a note being played from the beginning of the piece all the way through the end!
+
+            However, I have found a solution that maintains time savings while ensuring that these exceptionally long notes are not ignored. I created an extra loop after the backwards iteration to look for any notes that those notes are linked to that may be relevant to the current note being worked on. This works because in the above example, the notes at index 1 and 2 will obviously consider note 0, and note 3 will know to add note 0 since it is relevant to note 2 even if note 1 is not relevant!
+
+            I'm pretty happy with this solution, and in my testing the preprocessing runs even for long pieces without taking up too much extra time. I have ensured that these exceptional cases are correctly covered and that the list of relevant notes are correct for each note in the list.
+
+            This coming week I will begin a large step of my capstone, which will be to write rules to determine the actual intonation for each note before I can feed them into my Nsound stream.
+        </p>
     </body>
 </html>
