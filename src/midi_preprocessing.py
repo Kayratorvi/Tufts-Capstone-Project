@@ -62,3 +62,7 @@ def link_notes(notes, ticks_per_beat):
                 break # all other notes begin later in music
         
         note.separate_notes_by_concurrency()
+
+def tune_all_notes(notes):
+    for i, note in enumerate(notes):
+        note.set_tuning()

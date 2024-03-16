@@ -158,5 +158,19 @@
         <p>
             This week I was unable to complete much work due to being sick and dealing with a stressful midterm exam in the other class I'm taking this semester. I hope to have more work completed next week towards my chord analysis logic.
         </p>
+        <h2>Mar. 3-9 Report</h2>
+        <p>
+            This week I added some additional functions to the MidiMessageExt class to allow for easier preprocessing in the next step of my project, which will be to actually decide how notes should be tuned to each other. First, I wrote a function that separates linked notes into two lists: the first for notes that are actually playing at the same time as the current note, and the second for notes that are strictly nearby and not simultaneously playing. The purpose of this function is to ensure I can inspect notes that overlap at a higher importance level than notes that are only nearby but do not overlap. My intention is to place greater importance on notes that are being played together, to ensure those notes are played in tune with each other. However, seeing notes that are nearby will still be useful in some cases so I still want to have those for reference.
+
+            The other functionality I added this week was a function that returns a list of the unique notes from the linked notes and nearby notes lists. For example, one note I've been considering for my tests has over 20 notes linked and nearby, however running this function returns information that indicates that there are actually only 3 different notes being played in all the octaves. Information like that can help me easily identify that those three notes turn out to form a single simple chord, and that I should tune the notes accordingly.
+
+            Next week, I plan to begin work on my functionality to determine tuning on each individual note, as I believe I now have enough information from my preprocessing to start to write logic to make those determinations.
+        </p>
+        <h2>Mar. 10-16 Report</h2>
+        <p>
+            This week I started work on my tuning analysis functions. I wrote a lot of helper functions, including one that returns the distance between a root note and another note, one that checks if a note fits within a chord, and one that naively decides whether a chord can be identified from a group of notes. So far, everything works correctly! I plan to introduce more in-depth analysis for the corner cases where it is not clear what chord is playing. I think what I can do is try to identify cases where there is just one note that doesn't fit in cases of intentional dissonance. This could be done by taking cases where there are four or five note numbers existing at once and removing one from consideration and rerunning my existing simple chord analysis. Then, I could check for specific dissonance examples that make sense and "allow" those to exist. This should work very well for many cases.
+
+            I think I'm well on my way to completing this capstone project's first phase by the end of the semester! 
+        </p>
     </body>
 </html>
