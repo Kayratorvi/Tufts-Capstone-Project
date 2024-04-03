@@ -18,10 +18,11 @@ queue = process_note_lengths(mergedMid)
 #print(queue)
 link_notes(queue, mid.ticks_per_beat - 1)
 tune_all_notes(queue)
-i = 38
-print(queue)
-#print(mid.ticks_per_beat)
-#print("Linked notes: " + str(queue[i].linked_notes))
-#print(queue[i].unique_linked_notes())
-#print("\nRelated notes: " + str(queue[i].nearby_notes))
-#print(queue[i].unique_nearby_notes())                          
+i = 37
+#print(queue)
+#"""
+print(queue[i])
+print(mid.ticks_per_beat)
+print("Linked notes: " + str(queue[i].linked_notes))
+print(queue[i].unique_linked_notes())
+#"""

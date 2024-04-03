@@ -65,4 +65,4 @@ def link_notes(notes, ticks_per_beat):
 
 def tune_all_notes(notes):
     for i, note in enumerate(notes):
-        note.set_tuning()
+        note.set_tuning(notes)
