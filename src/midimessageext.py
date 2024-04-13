@@ -1,14 +1,17 @@
 class MidiMessageExt:
-    def __init__(self, channel, note, velocity, timestamp):
+    def __init__(self, channel, note, velocity, timestamp, tempo, ticks_per_beat, total_time_in_secs):
         self.channel = channel
         self.note = note
         self.velocity = velocity
         self.timestamp = timestamp
+        self.timestamp_in_seconds = total_time_in_secs
         self.i = -1
         self.note_length = -1 
         self.bass_tuning = -1
         self.is_major = -1
-        self.duration_seconds = -1.0 
+        self.duration_seconds = -1.0
+        self.tempo = tempo
+        self.ticks_per_beat = ticks_per_beat
         self.is_dissonance = False
         self.linked_notes = list()
         self.nearby_notes = list()
@@ -17,7 +20,7 @@ class MidiMessageExt:
         return f"\nMidiMessageExt(channel={self.channel}, note={self.note}, velocity={self.velocity}, timestamp={self.timestamp}, note_length={self.note_length}, tuning={self.print_tuning()}, duration_seconds={self.duration_seconds}, index={self.i})"
 
     def __str__(self):
-        return f"\nMidiMessageExt(channel={self.channel}, note={self.note}, velocity={self.velocity}, timestamp={self.timestamp}, note_length={self.note_length}, tuning={self.print_tuning()}, duration_in_seconds={self.duration_seconds}, index={self.i})"
+        return f"\nMidiMessageExt(channel={self.channel}, note={self.note}, velocity={self.velocity}, timestamp={self.timestamp}, note_length={self.note_length}, tuning={self.print_tuning()}, duration_seconds={self.duration_seconds}, index={self.i})"
 
     def change_frequency(self, frequency):
         self.frequency = frequency
@@ -25,9 +28,8 @@ class MidiMessageExt:
     def change_note_length(self, note_length):
         self.note_length = note_length
 
-    def calc_duration_seconds(self, tempo, ticks_per_beat):
-        self.duration_seconds = (float(self.note_length) / ticks_per_beat) * (tempo / 1000000.0)
-        return self.duration_seconds
+    def set_duration_seconds(self):
+        self.duration_seconds = (float(self.note_length) / self.ticks_per_beat) * (self.tempo / 1000000.0)
     
     def link_note(self, note):
         self.linked_notes.append(note)

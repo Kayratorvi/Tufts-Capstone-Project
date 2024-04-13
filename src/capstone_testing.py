@@ -14,15 +14,16 @@ mergedMid = mid.merged_track
 
 #print(mergedMid)
 #print("**********************\n**********************")
-queue = process_note_lengths(mergedMid)
+queue = process_note_lengths(mergedMid, mid.ticks_per_beat)
 #print(queue)
 link_notes(queue, mid.ticks_per_beat - 1)
 tune_all_notes(queue)
 i = 37
 #print(queue)
-#"""
+"""
 print(queue[i])
 print(mid.ticks_per_beat)
 print("Linked notes: " + str(queue[i].linked_notes))
 print(queue[i].unique_linked_notes())
-#"""
+"""
+output_wav(queue, "output.wav")

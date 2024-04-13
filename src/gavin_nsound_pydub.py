@@ -23,7 +23,7 @@ def stereo_note(sr, duration, f1, f2, gaussian_width):
 
     return audio * envelope
 
-def mono_note(sr, duration, f1, gaussian_width):
+def mono_note(sr, duration, f1, gaussian_width=0.90):
 
     sin = Sine(sr)
 

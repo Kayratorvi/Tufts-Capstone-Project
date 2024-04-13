@@ -1,25 +1,34 @@
 from midimessageext import MidiMessageExt
+from audio_channels import AudioChannels
+from Nsound import *
+from pydub import AudioSegment
+import os
 
 log = open("log.txt", "w")
 
-def process_note_lengths(midi):
+def process_note_lengths(midi, ticks_per_beat):
     queue = list()
     totalDeltaTime = 0
+    totalTimeInSecs = 0.0
     index = -1
+    tempo = 500000
 
     for message in midi:
         index = index + 1
         foundNote = False
         totalDeltaTime += message.time
         if not message.is_meta:
+            totalTimeInSecs += (float(message.time) / ticks_per_beat) * (tempo / 1000000.0)
+
             if message.type == "note_on" and message.velocity != 0:
-                queue.append(MidiMessageExt(message.channel, message.note, message.velocity, totalDeltaTime))
+                queue.append(MidiMessageExt(message.channel, message.note, message.velocity, totalDeltaTime, tempo, ticks_per_beat, totalTimeInSecs))
 
             elif (message.type == "note_on" and message.velocity == 0) or message.type == "note_off":
                 for note in queue:
                     if note.note == message.note and note.channel == message.channel and note.note_length < 0:
                         foundNote = True
                         note.change_note_length(totalDeltaTime - note.timestamp)
+                        note.set_duration_seconds()
                         break
                 
                 if not foundNote:
@@ -27,6 +36,10 @@ def process_note_lengths(midi):
             
             else:
                 log.write("\nDidn't process this message: " + str(message))
+        elif message.type == "set_tempo":
+            tempo = message.tempo
+            log.write("\nTempo meta_message: " + str(message))
+            totalTimeInSecs += (float(message.time) / ticks_per_beat) * (tempo / 1000000.0)
 
     return queue
 
@@ -66,3 +79,21 @@ def link_notes(notes, ticks_per_beat):
 def tune_all_notes(notes):
     for i, note in enumerate(notes):
         note.set_tuning(notes)
+
+def audio_note(freq, duration, sr=44100.0, gaussian_width=0.90):
+    sin = Sine(sr)
+    audio = AudioStream(sr, 1)
+    envelope = sin.drawFatGaussian(duration, gaussian_width)
+    audio[0] = sin.generate(duration, freq)
+
+    return audio * envelope
+
+def output_wav(notes, name):
+    audio = AudioChannels()
+
+    for note in notes:
+        audio.add_note(note)
+
+    print("Finished adding notes to NSound stream.\n")
+    
+    audio.output_audio(name)
