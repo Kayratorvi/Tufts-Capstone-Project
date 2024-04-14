@@ -161,42 +161,50 @@
         <h2>Mar. 3-9 Report</h2>
         <p>
             This week I added some additional functions to the MidiMessageExt class to allow for easier preprocessing in the next step of my project, which will be to actually decide how notes should be tuned to each other. First, I wrote a function that separates linked notes into two lists: the first for notes that are actually playing at the same time as the current note, and the second for notes that are strictly nearby and not simultaneously playing. The purpose of this function is to ensure I can inspect notes that overlap at a higher importance level than notes that are only nearby but do not overlap. My intention is to place greater importance on notes that are being played together, to ensure those notes are played in tune with each other. However, seeing notes that are nearby will still be useful in some cases so I still want to have those for reference.
-
+            <br><br>
             The other functionality I added this week was a function that returns a list of the unique notes from the linked notes and nearby notes lists. For example, one note I've been considering for my tests has over 20 notes linked and nearby, however running this function returns information that indicates that there are actually only 3 different notes being played in all the octaves. Information like that can help me easily identify that those three notes turn out to form a single simple chord, and that I should tune the notes accordingly.
-
+            <br><br>
             Next week, I plan to begin work on my functionality to determine tuning on each individual note, as I believe I now have enough information from my preprocessing to start to write logic to make those determinations.
         </p>
         <h2>Mar. 10-16 Report</h2>
         <p>
             This week I started work on my tuning analysis functions. I wrote a lot of helper functions, including one that returns the distance between a root note and another note, one that checks if a note fits within a chord, and one that naively decides whether a chord can be identified from a group of notes. So far, everything works correctly! I plan to introduce more in-depth analysis for the corner cases where it is not clear what chord is playing. I think what I can do is try to identify cases where there is just one note that doesn't fit in cases of intentional dissonance. This could be done by taking cases where there are four or five note numbers existing at once and removing one from consideration and rerunning my existing simple chord analysis. Then, I could check for specific dissonance examples that make sense and "allow" those to exist. This should work very well for many cases.
-
+            <br><br>
             I think I'm well on my way to completing this capstone project's first phase by the end of the semester! 
         </p>
         <h2>Mar. 17-23 Report</h2>
         <p>
             This week I made some tweaks to my program after I realized that I have a list of "nearby notes" that I am tracking that do not matter for my purposes at all. Originally I thought that I would need to make sure I can identify chords between notes that are not played together, but I realized that my true intention behind this project is to make sure that notes that are played together are tuned to each other, just as any modern orchestra would do. So, it doesn't actually matter whether notes that do not overlap are tuned to each other or not.
-
+            <br><br>
             This definitely simplifies things a bit, in that I do not need to correct my program if it decides that an uncommon chord exists someplace where literally only one note is being played. A note like that should be tuned by itself anyways.
-
+            <br><br>
             I spent some time cleaning up some code, adding notes, and commenting out some of the "nearby notes" functionality since I do not expect I'll need it anytime soon.
         </p>
         <h2>Mar. 24-30 Report</h2>
         <p>
             This week I started working on the logic that will handle identifying chords where there is a single dissonant note somewhere. I accomplished this by adding a new field to track whether a note is considered dissonant (so as to ensure I ignore it when considering tuning other notes) and by writing a few new cases to handle this logic. 
-
+            <br><br>
             First, I adjusted the beginning logic in the set_tuning function by essentially checking whether a note is dissonant with the established (or to-be established) tuning. This is done simply by handling the failure of the is_chord function differently. Now, I have a catch that will trigger an if path that will identify a situation where a chord is already established, but a note doesn't fit inside that chord. I have decided to allow the following dissonant intervals: [2, 5, 11] as well as the minor or major sixth depending on whether the original chord is major or minor [8 or 9]. 
-            
+            <br><br>
             If a dissonance is identified, the note is assigned the same bass_tuning as all other notes in the chord in spite of the dissonance, and has the is_dissonance flag set to True. This flag is important, as it ensures that future notes that may be part of the same chord ignore this dissonant note when making their own decisions.
-
+            <br><br>
             This seems to work correctly so far. Next week I will write a case to handle the situation of the dissonant note being the first one to have its tuning assigned since I realized that's totally possible.
         </p>
         <h2>Mar. 31-Apr. 6 Report</h2>
         <p>
             As mentioned last week, I worked this week on handling the case where I am trying to tune a chord that contains a dissonant note, but I have not yet tuned any notes in that chord. My current outcome is that nothing gets tuned, which is not ideal. I need a separate case from the one I wrote last week to ensure that when deciding what the tuning for the overall chord is for the first time, allowed dissonances are ignored.
-
+            <br><br>
             This required a nested loop checking every combination of root note and dissonant note until the right combination is found, using the rules I wrote last week. Each dissonant note would be left out of the list of notes that are checked against a potential root of the chord until an appropriate root and allowed dissonant chord is found. 
-
+            <br><br>
             This new case worked really well! I cut down the number of undefined tunings from 3500 to 1000 for the Horn Concerto MIDI I'm using for testing. The majority of undefined tunings left are cases of clusters of notes where a chord really cannot be defined very easily. I'm pretty happy with where I'm at in terms of what is tuned and what isn't. The plan now is to write the audio output file code so that I can start testing that everything I'm doing actually has the intended outcome. Assuming that goes well, the plan for the remainder of the semester will be to tweak this program further with small improvements until it is time to present. I may have time to introduce other MIDI features, including tempo and other stylistic pieces. 
+        </p>
+        <h2>Apr. 7-13 Report</h2>
+        <p>
+            This week I reached a critical milestone: my code now actually produces an audio file! It's clear from the audio files I've produced that my implementation thus far has been correctly done. I can hear the adjusted tuning, and it makes the music sound much better when chords are played. This is very exciting to have reached this step!
+            <br><br>
+            This ended up being quite the undertaking to produce audio. I underestimated how much it would take to get the audio stream working properly, and I'd like to still work out some kinks. It turned out that I needed to implement tempo tracking in my MidiMessageExt class, and that I needed a timestamp in seconds field that I could reference as well. Due to the possibility of any number of notes being played simultaneously, I needed to ensure that any number of channels in my final output were allowed. This meant I needed a way to add new channels in my audio stream on the fly, as I can't assume how many I will need just from the original MIDI file itself. It was a bit tricky getting everything to line up, but once I did I managed to overlay all channels over top of each other to produce my end result. To my delight, I could easily recognize the music being played from the .wav file! Everything synced up and I could tell that my intonations were coming through, though as expected it's subtle. 
+            <br><br>
+            It might be a challenge to convince Marty Allen that my program actually accomplishes something, so we'll see on Wednesday what he thinks about where I'm at now and whether he believes that my project accomplishes my original goal in the first phase or not.
         </p>
     </body>
 </html>
