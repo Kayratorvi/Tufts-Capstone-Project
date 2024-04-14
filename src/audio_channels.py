@@ -3,7 +3,7 @@ from pydub import AudioSegment
 import os
 
 class AudioChannels:
-    def __init__(self, sr=256000.0):
+    def __init__(self, sr=96000.0):
         self.audio = list()
         self.timestamps = list()
         self.sin = Sine(sr)
@@ -100,6 +100,6 @@ class AudioChannels:
 
         file_handle = combined.export(name, format="wav")
         os.remove("channel_0.wav")
-        print("Finished output file >> output.wav\n")
+        print("Finished output file >> "+ name + "\n")
         return
         

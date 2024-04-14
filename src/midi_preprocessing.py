@@ -80,16 +80,10 @@ def tune_all_notes(notes):
     for i, note in enumerate(notes):
         note.set_tuning(notes)
 
-def audio_note(freq, duration, sr=44100.0, gaussian_width=0.90):
-    sin = Sine(sr)
-    audio = AudioStream(sr, 1)
-    envelope = sin.drawFatGaussian(duration, gaussian_width)
-    audio[0] = sin.generate(duration, freq)
-
-    return audio * envelope
-
 def output_wav(notes, name):
     audio = AudioChannels()
+
+    print("Staring to add notes to NSound stream.\n")
 
     for note in notes:
         audio.add_note(note)
