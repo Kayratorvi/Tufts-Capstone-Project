@@ -81,7 +81,7 @@ class AudioChannels:
         return freq
 
     def output_audio(self, name):
-        print("Starting to output audio.\n")
+        print("Starting to output audio...\n")
         for i, channel in enumerate(self.audio):
             channel >> "channel_" + str(i) + ".wav"
             if (not os.path.exists("channel_" + str(i) + ".wav")):

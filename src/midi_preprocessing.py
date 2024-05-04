@@ -7,6 +7,7 @@ import os
 log = open("log.txt", "w")
 
 def process_note_lengths(midi, ticks_per_beat):
+    print("Reading MIDI File...\n")
     queue = list()
     totalDeltaTime = 0
     totalTimeInSecs = 0.0
@@ -77,13 +78,14 @@ def link_notes(notes, ticks_per_beat):
         note.separate_notes_by_concurrency()
 
 def tune_all_notes(notes):
+    print("Performing chord analysis...\n")
     for i, note in enumerate(notes):
         note.set_tuning(notes)
 
 def output_wav(notes, name):
     audio = AudioChannels()
 
-    print("Staring to add notes to NSound stream.\n")
+    print("Starting to add notes to NSound stream...\n")
 
     for note in notes:
         audio.add_note(note)
